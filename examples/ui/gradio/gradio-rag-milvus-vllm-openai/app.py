@@ -2,6 +2,7 @@ import json
 import os
 import random
 import time
+import httpx
 from collections.abc import Generator
 from queue import Empty, Queue
 from threading import Thread
@@ -28,6 +29,7 @@ APP_TITLE = os.getenv('APP_TITLE', 'Chat with your Knowledge Base!')
 SHOW_TITLE_IMAGE = os.getenv('SHOW_TITLE_IMAGE', 'True')
 
 INFERENCE_SERVER_URL = os.getenv('INFERENCE_SERVER_URL')
+INFERENCE_SERVER_TLS_VERIFY = os.getenv('INFERENCE_SERVER_TLS_VERIFY', 'False')
 MODEL_NAME = os.getenv('MODEL_NAME')
 MAX_TOKENS = int(os.getenv('MAX_TOKENS', 512))
 TOP_P = float(os.getenv('TOP_P', 0.95))
@@ -80,18 +82,34 @@ def stream(input_text, selected_collection) -> Generator:
     q = Queue()
 
     # Instantiate LLM
-    llm =  VLLMOpenAI(
-        openai_api_key="EMPTY",
-        openai_api_base=INFERENCE_SERVER_URL,
-        model_name=MODEL_NAME,
-        max_tokens=MAX_TOKENS,
-        top_p=TOP_P,
-        temperature=TEMPERATURE,
-        presence_penalty=PRESENCE_PENALTY,
-        streaming=True,
-        verbose=False,
-        callbacks=[QueueCallback(q)]
-    )
+    if INFERENCE_SERVER_TLS_VERIFY == 'False':
+        llm =  VLLMOpenAI(
+            openai_api_key="EMPTY",
+            openai_api_base=INFERENCE_SERVER_URL,
+            model_name=MODEL_NAME,
+            max_tokens=MAX_TOKENS,
+            top_p=TOP_P,
+            temperature=TEMPERATURE,
+            presence_penalty=PRESENCE_PENALTY,
+            streaming=True,
+            verbose=False,
+            callbacks=[QueueCallback(q)],
+            async_client=httpx.AsyncClient(verify=False),
+            http_client=httpx.Client(verify=False)
+        )
+    else:
+        llm =  VLLMOpenAI(
+            openai_api_key="EMPTY",
+            openai_api_base=INFERENCE_SERVER_URL,
+            model_name=MODEL_NAME,
+            max_tokens=MAX_TOKENS,
+            top_p=TOP_P,
+            temperature=TEMPERATURE,
+            presence_penalty=PRESENCE_PENALTY,
+            streaming=True,
+            verbose=False,
+            callbacks=[QueueCallback(q)]
+        )
 
     # Instantiate QA chain
     retriever = MilvusRetrieverWithScoreThreshold(
@@ -226,3 +244,4 @@ if __name__ == "__main__":
         favicon_path='./assets/robot-head.ico',
         allowed_paths=["./assets/"]
         )
+
