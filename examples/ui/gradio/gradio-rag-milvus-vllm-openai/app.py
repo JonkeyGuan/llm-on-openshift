@@ -30,6 +30,8 @@ SHOW_TITLE_IMAGE = os.getenv('SHOW_TITLE_IMAGE', 'True')
 
 INFERENCE_SERVER_URL = os.getenv('INFERENCE_SERVER_URL')
 INFERENCE_SERVER_TLS_VERIFY = os.getenv('INFERENCE_SERVER_TLS_VERIFY', 'False')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'EMPTY')
+
 MODEL_NAME = os.getenv('MODEL_NAME')
 MAX_TOKENS = int(os.getenv('MAX_TOKENS', 512))
 TOP_P = float(os.getenv('TOP_P', 0.95))
@@ -84,7 +86,7 @@ def stream(input_text, selected_collection) -> Generator:
     # Instantiate LLM
     if INFERENCE_SERVER_TLS_VERIFY == 'False':
         llm =  VLLMOpenAI(
-            openai_api_key="EMPTY",
+            openai_api_key=OPENAI_API_KEY,
             openai_api_base=INFERENCE_SERVER_URL,
             model_name=MODEL_NAME,
             max_tokens=MAX_TOKENS,
@@ -99,7 +101,7 @@ def stream(input_text, selected_collection) -> Generator:
         )
     else:
         llm =  VLLMOpenAI(
-            openai_api_key="EMPTY",
+            openai_api_key=OPENAI_API_KEY,
             openai_api_base=INFERENCE_SERVER_URL,
             model_name=MODEL_NAME,
             max_tokens=MAX_TOKENS,
