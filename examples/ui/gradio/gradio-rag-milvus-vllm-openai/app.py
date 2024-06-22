@@ -31,6 +31,7 @@ SHOW_TITLE_IMAGE = os.getenv('SHOW_TITLE_IMAGE', 'True')
 INFERENCE_SERVER_URL = os.getenv('INFERENCE_SERVER_URL')
 INFERENCE_SERVER_TLS_VERIFY = os.getenv('INFERENCE_SERVER_TLS_VERIFY', 'False')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'EMPTY')
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'nomic-ai/nomic-embed-text-v1')
 
 MODEL_NAME = os.getenv('MODEL_NAME')
 MAX_TOKENS = int(os.getenv('MAX_TOKENS', 512))
@@ -172,7 +173,7 @@ def stream(input_text, selected_collection) -> Generator:
 # Document store: Milvus
 model_kwargs = {'trust_remote_code': True}
 embeddings = HuggingFaceEmbeddings(
-    model_name="nomic-ai/nomic-embed-text-v1",
+    model_name=EMBEDDING_MODEL,
     model_kwargs=model_kwargs,
     show_progress=False
 )
